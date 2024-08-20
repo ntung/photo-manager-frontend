@@ -47,6 +47,11 @@ export default [
         Component: React.lazy(() => import("@/examples/CounterPlugin")),
       },
       {
+        path: "mywork/ladies01",
+        title: "Counter - My Work",
+        Component: React.lazy(() => import("@/examples/CounterPluginMyWork")),
+      },
+      {
         path: "download",
         title: "Download",
         Component: React.lazy(() => import("@/examples/DownloadPlugin")),

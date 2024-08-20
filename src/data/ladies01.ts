@@ -1,0 +1,10 @@
+export const ladies = [
+    { src: "/assets/ladies01/455759486_3006228989552824_7687661600677911251_n.jpg" },
+    { src: "/assets/ladies01/456046655_2821901161302848_7480444463527782505_n.jpg" },
+    { src: "/assets/ladies01/456256142_122192458052067409_9037716715251105911_n.jpg" },
+    { src: "/assets/ladies01/456290988_1025714325578451_470047867991536388_n.jpg" }
+].map(({src}) => ({
+    src: "http://localhost:4173" + src
+}));
+
+export default ladies;

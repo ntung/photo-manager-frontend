@@ -2,6 +2,7 @@ export { default as BasicExample } from "./BasicExample";
 export { default as CaptionsPlugin } from "./CaptionsPlugin";
 export { default as Carousel } from "./Carousel";
 export { default as CounterPlugin } from "./CounterPlugin";
+export { default as CounterPluginMyWork } from "./CounterPluginMyWork";
 export { default as CustomSlides } from "./CustomSlides";
 export { default as DownloadPlugin } from "./DownloadPlugin";
 export { default as FullscreenPlugin } from "./FullscreenPlugin";
