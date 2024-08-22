@@ -93,4 +93,15 @@ export default [
       },
     ],
   },
+  {
+    path: "myphotos",
+    title: "My Photos",
+    children: [
+      {
+        path: "ao-dai-viet-nam",
+        title: "Ao Dai Viet Nam",
+        Component: React.lazy(() => import("@/myphotos/AoDaiVietNam"))
+      }
+    ]
+  }
 ];
