@@ -51,8 +51,8 @@ export default function Album() {
 
   return (
     <>
-      <Title>Title: {album.title}</Title>
-      <Paragraph>Description: {album.description}</Paragraph>
+      <Title>Album: {album.title}</Title>
+      <Paragraph><h2><em>{album.description}</em></h2></Paragraph>
       <Paragraph>{pathname}</Paragraph>
       <ul>{
         album.photos.map((p, i) => (
