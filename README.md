@@ -7,3 +7,4 @@ Include the given code in the **preview** key under the **script** object.
 npm install
 npm run preview
 ```
+After changing anything, run `npm run build` to build the latest codes for the production.
