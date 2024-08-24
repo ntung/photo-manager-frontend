@@ -9,6 +9,7 @@ import "yet-another-react-lightbox/styles.css";
 
 import { Link, Section, Paragraph } from "@/components";
 import sitemap from "@/data/sitemap";
+import MyComponent from "@/myphotos/HelloWorld.tsx";
 
 function Layout() {
   return (
@@ -20,9 +21,10 @@ function Layout() {
       </Box>
 
       <Divider sx={{ margin: "8px auto" }} />
-
+      <MyComponent />
+      <Divider sx={{ margin: "8px auto" }} />
       <Box component="main" sx={{ mb: 3 }}>
-        <React.Suspense>
+        <React.Suspense fallback={<div>Loading...</div>}>
           <Outlet />
         </React.Suspense>
       </Box>
