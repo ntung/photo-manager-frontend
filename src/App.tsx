@@ -43,7 +43,7 @@ export default function App() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:5000/albums');
+      const response = await fetch(import.meta.env.VITE_BACKEND_API+'/albums');
       const result = await response.json();
       //console.log(result);
       setAlbums(result);
