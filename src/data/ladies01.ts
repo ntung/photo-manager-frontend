@@ -7,7 +7,7 @@ export const ladies = [
     { src: "/assets/ladies01/452191131_7969555339792015_8350281371770719685_n.jpg" },
     { src: "/assets/ladies01/451845670_122161434170133782_9141442333876530996_n.jpg" },
 ].map(({src}) => ({
-    src: "http://localhost:4173" + src
+    src: "https://192.168.0.210:4173" + src
 }));
 
 export default ladies;

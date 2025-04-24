@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -9,6 +10,7 @@ import "yet-another-react-lightbox/styles.css";
 
 import { Link, Section, Paragraph } from "@/components";
 import sitemap from "@/data/sitemap";
+import MyComponent from "@/myphotos/HelloWorld.tsx";
 
 function Layout() {
   return (
@@ -20,9 +22,10 @@ function Layout() {
       </Box>
 
       <Divider sx={{ margin: "8px auto" }} />
-
+      <MyComponent />
+      <Divider sx={{ margin: "8px auto" }} />
       <Box component="main" sx={{ mb: 3 }}>
-        <React.Suspense>
+        <React.Suspense fallback={<div>Loading...</div>}>
           <Outlet />
         </React.Suspense>
       </Box>
@@ -31,6 +34,32 @@ function Layout() {
 }
 
 export default function App() {
+  const [albums, setAlbums] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+    console.log(albums);
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(import.meta.env.VITE_BACKEND_API+'/albums');
+      const result = await response.json();
+      //console.log(result);
+      setAlbums(result);
+      result.forEach((album: { path: string; title: string; }) => {
+        sitemap[2].children.push({
+          path: album.path,
+          title: album.title,
+          Component: React.lazy(() => import("@/myphotos/Album"))
+        });
+      });
+      return result;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
   return (
     <BrowserRouter>
       <Routes>
@@ -53,7 +82,7 @@ export default function App() {
                 </Typography>
 
                 <Paragraph mt={2}>
-                  Are you looking for a sandbox to porvide an example or
+                  Are you looking for a sandbox to provide an example or
                   reproduce an issue? Here is a{" "}
                   <a
                     href="https://stackblitz.com/edit/yet-another-react-lightbox-sandbox?file=src%2FApp.tsx"

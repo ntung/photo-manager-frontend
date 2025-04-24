@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export default [
+const data = [
   {
     path: "examples",
     title: "Examples",
@@ -98,10 +98,12 @@ export default [
     title: "My Photos",
     children: [
       {
-        path: "ao-dai-viet-nam",
+        path: "ao-dai-viet-nam-0",
         title: "Ao Dai Viet Nam",
         Component: React.lazy(() => import("@/myphotos/AoDaiVietNam"))
       }
     ]
   }
 ];
+
+export default data;
