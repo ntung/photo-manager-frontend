@@ -31,7 +31,7 @@ export default function Album() {
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      console.log(slides);
+      console.log("Slides:", slides);
     }
   }, [path]);
 

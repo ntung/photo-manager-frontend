@@ -37,9 +37,10 @@ export default function App() {
   const [albums, setAlbums] = useState([]);
 
   useEffect(() => {
-    fetchData();
-    console.log(albums);
-  }, []);
+    fetchData().then((r) => {
+      console.log(albums, r);
+    });
+  }, [albums]);
 
   const fetchData = async () => {
     try {
