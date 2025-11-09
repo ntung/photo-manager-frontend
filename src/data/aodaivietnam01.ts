@@ -10,7 +10,7 @@ export const ladies = [
     { src: "/assets/aodaivietnam/collection001/008.jpg" },
     { src: "/assets/aodaivietnam/collection001/009.jpg" }
 ].map(({src}) => ({
-    src: "https://192.168.0.210:4173" + src
+    src: "http://localhost:4173" + src
 }));
 
 export default ladies;

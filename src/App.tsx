@@ -35,7 +35,15 @@ function Layout() {
 
 export default function App() {
   const [albums, setAlbums] = useState([]);
+  console.log("BACKEND_SVR", import.meta.env.BACKEND_SVR);
+  console.log("VITE_SOME_KEY", import.meta.env.VITE_SOME_KEY);
+  console.log("DB_PASSWORD", import.meta.env.DB_PASSWORD);
+  console.log("MODE", import.meta.env.MODE);
+  console.log("BASE_URL", import.meta.env.BASE_URL);
 
+  console.log("TZ ", process.env.TZ);
+  console.log("BACKEND SVR via process.env", process.env.REACT_APP_BACKEND_SVR);
+  console.log(process.env.REACT_APP_DB_PASSWORD);
   useEffect(() => {
     fetchData().then((r) => {
       console.log(albums, r);
