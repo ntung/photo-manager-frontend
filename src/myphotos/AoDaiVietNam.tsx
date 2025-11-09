@@ -13,9 +13,9 @@ export default function AoDaiVietNam() {
 
   return (
     <>
-      <Title>The Sexiest Ao Dai Collection</Title>
+      <Title>The First Ao Dai Collection</Title>
 
-      <Paragraph>Bo Suu Tap Ao Dai Viet Nam Sexiest.</Paragraph>
+      <Paragraph>Bo Suu Tap Ao Dai Viet Nam Dau Tien.</Paragraph>
 
       <Lightbox
         open={open}
