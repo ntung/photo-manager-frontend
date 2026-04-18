@@ -1,5 +1,6 @@
 import * as React from "react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import type { SlideshowRef } from "yet-another-react-lightbox/plugins/slideshow";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
@@ -23,6 +24,7 @@ export default function Album() {
     photos: [],
     photos_details: []
   });
+  const slideshowRef = useRef<SlideshowRef>(null);
   const pathname = window.location.pathname;
   const path = pathname.substring(pathname.lastIndexOf("/")+1);
   const fetchData = useCallback(async () => {
@@ -60,7 +62,13 @@ export default function Album() {
         close={() => setOpen(false)}
         slides={slides}
         plugins={[Counter, Slideshow]}
-        slideshow={{ autoplay: true, delay: 5000 }}
+        slideshow={{ ref: slideshowRef, autoplay: true, delay: 5000 }}
+        on={{
+          keydown: (event) => {
+            if (event.key === 'p') slideshowRef.current?.pause();
+            if (event.key === 'P') slideshowRef.current?.play();
+          }
+        }}
       />
 
       <LightboxButton onClick={() => setOpen(true)} />
