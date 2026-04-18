@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
         key: fs.readFileSync(path.resolve(__dirname, env.VITE_PERM_KEY)),
         cert: fs.readFileSync(path.resolve(__dirname, env.VITE_PERM_PUB)),
       },
-      host: '0:0:0:0',
+      host: '0.0.0.0',
       watch: {
         usePolling: true
       }
