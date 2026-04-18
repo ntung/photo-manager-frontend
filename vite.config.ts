@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => {
         cert: fs.readFileSync(path.resolve(__dirname, env.VITE_PERM_PUB)),
       },
       host: '0.0.0.0',
+      port: 5600,
+      hmr: {
+        clientPort: 5600,
+      },
       watch: {
         usePolling: true
       }
