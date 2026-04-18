@@ -39,6 +39,16 @@ export default function Album() {
   }, [path]);
 
   useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'p') slideshowRef.current?.pause();
+      if (e.key === 'P') slideshowRef.current?.play();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
+
+  useEffect(() => {
     fetchData().then((res) => {
       setAlbum(res);
       // console.log(res.photos_details);
@@ -63,12 +73,6 @@ export default function Album() {
         slides={slides}
         plugins={[Counter, Slideshow]}
         slideshow={{ ref: slideshowRef, autoplay: true, delay: 5000 }}
-        on={{
-          keydown: (event) => {
-            if (event.key === 'p') slideshowRef.current?.pause();
-            if (event.key === 'P') slideshowRef.current?.play();
-          }
-        }}
       />
 
       <LightboxButton onClick={() => setOpen(true)} />
