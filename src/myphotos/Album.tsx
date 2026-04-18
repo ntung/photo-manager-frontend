@@ -2,6 +2,7 @@ import * as React from "react";
 import { useCallback, useEffect } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
+import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
 
 import "yet-another-react-lightbox/plugins/counter.css";
 
@@ -58,7 +59,8 @@ export default function Album() {
         open={open}
         close={() => setOpen(false)}
         slides={slides}
-        plugins={[Counter]}
+        plugins={[Counter, Slideshow]}
+        slideshow={{ autoplay: true, delay: 5000 }}
       />
 
       <LightboxButton onClick={() => setOpen(true)} />
