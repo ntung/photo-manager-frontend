@@ -56,6 +56,7 @@ export default function Album() {
   useEffect(() => {
     fetchData().then((res) => {
       setAlbum(res);
+      document.title = `${res.title} | Photo Manager`;
       // console.log(res.photos_details);
       // setSlides([{ "src": import.meta.env.BACKEND_SVR + "/photo/aaaa/451845670_122161434170133782_9141442333876530996_n.jpg" }]);
       // setSlides([{ "src": "http://127.0.0.1:5000/photo/aaaa/451845670_122161434170133782_9141442333876530996_n.jpg" }]);
