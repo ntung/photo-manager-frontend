@@ -42,8 +42,7 @@ export default function Album() {
       // setSlides([{ "src": import.meta.env.BACKEND_SVR + "/photo/aaaa/451845670_122161434170133782_9141442333876530996_n.jpg" }]);
       // setSlides([{ "src": "http://127.0.0.1:5000/photo/aaaa/451845670_122161434170133782_9141442333876530996_n.jpg" }]);
       const photos: React.SetStateAction<{ src: string; }[]> = [];
-      res.photos_details.map((p: { [x: string]: string; }, idx: never) => {
-          console.log(idx);
+      res.photos_details.map((p: { [x: string]: string; }) => {
           photos.push({ "src": import.meta.env.VITE_BACKEND_API+"/photo/" + p['folder'] + "/" + p['filename'] });
       });
       setSlides(photos);
@@ -53,7 +52,7 @@ export default function Album() {
   return (
     <>
       <Title>Album: {album.title}</Title>
-      <Paragraph><h2><em>{album.description}</em></h2></Paragraph>
+      <Paragraph variant="h2"><em>{album.description}</em></Paragraph>
 
       <Lightbox
         open={open}

@@ -46,7 +46,7 @@ export default function Section({ title, path, items }: SectionProps) {
       >
         {items.map((item) => (
           <Paper
-            key={item.title}
+            key={item.path}
             variant="outlined"
             component={Link}
             href={`/${path}/${item.path}`}
