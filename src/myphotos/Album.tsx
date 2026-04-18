@@ -41,8 +41,13 @@ export default function Album() {
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'p') slideshowRef.current?.pause();
-      if (e.key === 'P') slideshowRef.current?.play();
+      if (e.key === 'P') {
+        if (slideshowRef.current?.playing) {
+          slideshowRef.current.pause();
+        } else {
+          slideshowRef.current?.play();
+        }
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
