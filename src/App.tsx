@@ -33,41 +33,41 @@ function Layout() {
   );
 }
 
+const AlbumComponent = React.lazy(() => import("@/myphotos/Album"));
+
 export default function App() {
-  const [albums, setAlbums] = useState([]);
-  console.log("BACKEND_SVR", import.meta.env.BACKEND_SVR);
-  console.log("VITE_SOME_KEY", import.meta.env.VITE_SOME_KEY);
-  console.log("DB_PASSWORD", import.meta.env.DB_PASSWORD);
-  console.log("MODE", import.meta.env.MODE);
-  console.log("BASE_URL", import.meta.env.BASE_URL);
+  const [albums, setAlbums] = useState<{ path: string; title: string }[]>([]);
+  const [albumsLoaded, setAlbumsLoaded] = useState(false);
 
-  console.log("TZ ", process.env.TZ);
-  console.log("BACKEND SVR via process.env", process.env.REACT_APP_BACKEND_SVR);
-  console.log(process.env.REACT_APP_DB_PASSWORD);
   useEffect(() => {
-    fetchData().then((r) => {
-      console.log(albums, r);
-    });
-  }, [albums]);
-
-  const fetchData = async () => {
-    try {
-      const response = await fetch(import.meta.env.VITE_BACKEND_API+'/albums');
-      const result = await response.json();
-      //console.log(result);
-      setAlbums(result);
-      result.forEach((album: { path: string; title: string; }) => {
-        sitemap[2].children.push({
-          path: album.path,
-          title: album.title,
-          Component: React.lazy(() => import("@/myphotos/Album"))
-        });
-      });
-      return result;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
+    const fetchData = async () => {
+      try {
+        const response = await fetch(import.meta.env.VITE_BACKEND_API + '/albums');
+        const raw = await response.json();
+        const result = raw.filter(
+          (album: { path: string }, i: number, arr: { path: string }[]) =>
+            arr.findIndex((a) => a.path === album.path) === i
+        );
+        setAlbums(result);
+        const staticChildren = sitemap[2].children.filter(
+          (c) => !result.some((album: { path: string }) => album.path === c.path)
+        );
+        sitemap[2].children = [
+          ...staticChildren,
+          ...result.map((album: { path: string; title: string }) => ({
+            path: album.path,
+            title: album.title,
+            Component: AlbumComponent,
+          })),
+        ];
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setAlbumsLoaded(true);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <BrowserRouter>
@@ -106,18 +106,30 @@ export default function App() {
             }
           />
 
-          {sitemap.map(({ path, title, children }) => (
+          {sitemap.slice(0, 2).map(({ path, title, children }) => (
             <Route key={path} path={path}>
               <Route
                 index
                 element={<Section title={title} path={path} items={children} />}
               />
-
               {children.map(({ path, Component }) => (
                 <Route key={path} path={path} element={<Component />} />
               ))}
             </Route>
           ))}
+
+          <Route path={sitemap[2].path}>
+            <Route
+              index
+              element={<Section title={sitemap[2].title} path={sitemap[2].path} items={sitemap[2].children} />}
+            />
+            {!albumsLoaded
+              ? <Route path="*" element={<div>Loading...</div>} />
+              : albums.map(({ path }) => (
+                  <Route key={path} path={path} element={<AlbumComponent />} />
+                ))
+            }
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
