@@ -10,6 +10,7 @@ import "yet-another-react-lightbox/styles.css";
 
 import { Link, Section, Paragraph } from "@/components";
 import sitemap from "@/data/sitemap";
+import AlbumsIndex, { type AlbumSummary } from "@/myphotos/AlbumsIndex";
 
 function Layout() {
   return (
@@ -33,7 +34,7 @@ function Layout() {
 const AlbumComponent = React.lazy(() => import("@/myphotos/Album"));
 
 export default function App() {
-  const [albums, setAlbums] = useState<{ path: string; title: string }[]>([]);
+  const [albums, setAlbums] = useState<AlbumSummary[]>([]);
   const [albumsLoaded, setAlbumsLoaded] = useState(false);
 
   useEffect(() => {
@@ -118,7 +119,7 @@ export default function App() {
           <Route path={sitemap[2].path}>
             <Route
               index
-              element={<Section title={sitemap[2].title} path={sitemap[2].path} items={sitemap[2].children} />}
+              element={<AlbumsIndex albums={albums} loading={!albumsLoaded} />}
             />
             {!albumsLoaded
               ? <Route path="*" element={<div>Loading...</div>} />
