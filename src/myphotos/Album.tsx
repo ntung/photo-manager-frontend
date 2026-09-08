@@ -7,7 +7,12 @@ import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
 
 import "yet-another-react-lightbox/plugins/counter.css";
 
-import { LightboxButton, Paragraph, Title } from "@/components";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+
+import { Paragraph, Title } from "@/components";
 // import slides from "@/data/slides.ts";
 // import aodais from "@/data/aodaivietnam01";
 
@@ -38,6 +43,14 @@ function writeCachedCover(path: string, src: string) {
   }
 }
 
+// Mirrors the {cover_photo_id, cover_photo_url, needs_regen} shape shared by
+// every /api/v1/album/<path>/cover response on the backend.
+type CoverResource = {
+  cover_photo_id: string | null;
+  cover_photo_url: string | null;
+  needs_regen: boolean;
+};
+
 export default function Album() {
   const pathname = window.location.pathname;
   const path = pathname.substring(pathname.lastIndexOf("/") + 1);
@@ -45,6 +58,9 @@ export default function Album() {
   const [open, setOpen] = React.useState(false);
   const [cover, setCover] = React.useState(() => readCachedCover(path));
   const [coverIndex, setCoverIndex] = React.useState(0);
+  const [coverState, setCoverState] = React.useState<CoverResource | null>(null);
+  const [generating, setGenerating] = React.useState(false);
+  const [generateError, setGenerateError] = React.useState("");
   const [startIndex, setStartIndex] = React.useState(0);
 
   const openAt = (index: number) => {
@@ -74,6 +90,57 @@ export default function Album() {
     }
   }, [path]);
 
+  const fetchCoverState = useCallback(async (): Promise<CoverResource | null> => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_API}/api/v1/album/${path}/cover`
+      );
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching cover state:', error);
+      return null;
+    }
+  }, [path]);
+
+  // Loads the album's photos plus its cover state, and resolves what to
+  // show as the cover image. Used on mount and again after a successful
+  // generate/re-generate so the new cover shows up immediately.
+  const loadAlbum = useCallback(async () => {
+    const [res, coverRes] = await Promise.all([fetchData(), fetchCoverState()]);
+    if (!res) return;
+    setAlbum(res);
+    document.title = `${res.title} | Photo Manager`;
+    const photos: React.SetStateAction<{ src: string; }[]> = [];
+    res.photos_details.map((p: { [x: string]: string; }) => {
+        photos.push({ "src": import.meta.env.VITE_BACKEND_API+"/photo/" + p['folder'] + "/" + p['filename'] });
+    });
+    setSlides(photos);
+    setCoverState(coverRes);
+
+    // Album cover: prefer the dedicated cover resource (freshest, and the
+    // only place needs_regen comes from), then the /albums/<path> payload's
+    // own cover_photo_url, since the cover photo isn't necessarily one of
+    // the album's own photos (e.g. an auto-generated collage cover lives as
+    // a standalone photo). Fall back to the first photo when neither has one.
+    const coverId = coverRes?.cover_photo_id ?? res.cover_photo?.$oid;
+    const details: { _id?: { $oid?: string } }[] = res.photos_details ?? [];
+    const idx = coverId
+      ? details.findIndex((p) => p?._id?.$oid === coverId)
+      : -1;
+    const resolvedIndex = idx >= 0 ? idx : 0;
+    const coverSrc = coverRes?.cover_photo_url
+      ? import.meta.env.VITE_BACKEND_API + coverRes.cover_photo_url
+      : res.cover_photo_url
+      ? import.meta.env.VITE_BACKEND_API + res.cover_photo_url
+      : photos[resolvedIndex]?.src;
+    if (coverSrc) {
+      setCover(coverSrc);
+      setCoverIndex(idx >= 0 ? idx : 0);
+      writeCachedCover(path, coverSrc);
+    }
+  }, [fetchData, fetchCoverState, path]);
+
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -90,39 +157,37 @@ export default function Album() {
   }, [open]);
 
   useEffect(() => {
-    fetchData().then((res) => {
-      setAlbum(res);
-      document.title = `${res.title} | Photo Manager`;
-      // console.log(res.photos_details);
-      // setSlides([{ "src": import.meta.env.BACKEND_SVR + "/photo/aaaa/451845670_122161434170133782_9141442333876530996_n.jpg" }]);
-      // setSlides([{ "src": "http://127.0.0.1:5000/photo/aaaa/451845670_122161434170133782_9141442333876530996_n.jpg" }]);
-      const photos: React.SetStateAction<{ src: string; }[]> = [];
-      res.photos_details.map((p: { [x: string]: string; }) => {
-          photos.push({ "src": import.meta.env.VITE_BACKEND_API+"/photo/" + p['folder'] + "/" + p['filename'] });
-      });
-      setSlides(photos);
+    loadAlbum();
+  }, [loadAlbum]);
 
-      // Album cover: prefer the server-resolved cover_photo_url, since the
-      // cover photo isn't necessarily one of the album's own photos (e.g. an
-      // auto-generated collage cover lives as a standalone photo). Fall back
-      // to the photo referenced by album.cover_photo within this album's own
-      // list, then to the first photo, when no cover URL comes back.
-      const coverId = res.cover_photo?.$oid;
-      const details: { _id?: { $oid?: string } }[] = res.photos_details ?? [];
-      const idx = coverId
-        ? details.findIndex((p) => p?._id?.$oid === coverId)
-        : -1;
-      const resolvedIndex = idx >= 0 ? idx : 0;
-      const coverSrc = res.cover_photo_url
-        ? import.meta.env.VITE_BACKEND_API + res.cover_photo_url
-        : photos[resolvedIndex]?.src;
-      if (coverSrc) {
-        setCover(coverSrc);
-        setCoverIndex(idx >= 0 ? idx : 0);
-        writeCachedCover(path, coverSrc);
+  const handleGenerateCover = async () => {
+    if (coverState && !coverState.needs_regen) {
+      if (!window.confirm("Replace the current cover with a newly generated one?")) {
+        return;
       }
-    });
-  }, [fetchData, path]);
+    }
+    setGenerating(true);
+    setGenerateError("");
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_API}/api/v1/album/${path}/cover/generate`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ randomize: true }),
+        }
+      );
+      const data = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to generate cover");
+      }
+      await loadAlbum();
+    } catch (error) {
+      setGenerateError(error instanceof Error ? error.message : "Failed to generate cover");
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <>
@@ -153,7 +218,32 @@ export default function Album() {
         />
       )}
 
-      <LightboxButton onClick={() => openAt(0)} />
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+        {album.photos_details.length > 0 && (
+          <Button
+            variant="outlined"
+            onClick={handleGenerateCover}
+            disabled={generating}
+            startIcon={generating ? <CircularProgress size={16} /> : undefined}
+          >
+            {generating
+              ? "Generating…"
+              : coverState && !coverState.needs_regen
+              ? "Re-generate cover"
+              : "Generate cover"}
+          </Button>
+        )}
+
+        <Button variant="contained" onClick={() => openAt(0)}>
+          Open Lightbox
+        </Button>
+      </Box>
+
+      {generateError && (
+        <Typography color="error" variant="body2" sx={{ mt: -1, mb: 2 }}>
+          {generateError}
+        </Typography>
+      )}
 
     </>
   );
