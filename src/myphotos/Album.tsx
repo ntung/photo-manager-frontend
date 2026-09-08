@@ -13,6 +13,7 @@ import { LightboxButton, Paragraph, Title } from "@/components";
 
 export default function Album() {
   const [open, setOpen] = React.useState(false);
+  const [cover, setCover] = React.useState("");
   const [slides, setSlides] = React.useState([{
     src: "/aaaa/default.jpg"
   }]);
@@ -65,6 +66,9 @@ export default function Album() {
           photos.push({ "src": import.meta.env.VITE_BACKEND_API+"/photo/" + p['folder'] + "/" + p['filename'] });
       });
       setSlides(photos);
+      if (photos.length > 0) {
+        setCover(photos[0].src);
+      }
     });
   }, [fetchData]);
 
@@ -80,6 +84,21 @@ export default function Album() {
         plugins={[Counter, Slideshow]}
         slideshow={{ ref: slideshowRef, autoplay: true, delay: 5000 }}
       />
+
+      {cover && (
+        <img
+          src={cover}
+          alt={`${album.title} cover`}
+          onClick={() => setOpen(true)}
+          style={{
+            display: "block",
+            margin: "0 auto 16px",
+            maxWidth: "100%",
+            maxHeight: "70vh",
+            cursor: "pointer",
+          }}
+        />
+      )}
 
       <LightboxButton onClick={() => setOpen(true)} />
 
