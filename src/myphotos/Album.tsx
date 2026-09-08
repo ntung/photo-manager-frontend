@@ -11,9 +11,39 @@ import { LightboxButton, Paragraph, Title } from "@/components";
 // import slides from "@/data/slides.ts";
 // import aodais from "@/data/aodaivietnam01";
 
+// Cache the resolved album cover URL per album path so it renders instantly on
+// revisit. The album data itself is still refetched in the background.
+const COVER_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
+
+function readCachedCover(path: string): string {
+  try {
+    const raw = localStorage.getItem("albumCover:" + path);
+    if (!raw) return "";
+    const { src, ts } = JSON.parse(raw) as { src: string; ts: number };
+    if (!src || Date.now() - ts > COVER_CACHE_TTL) return "";
+    return src;
+  } catch {
+    return "";
+  }
+}
+
+function writeCachedCover(path: string, src: string) {
+  try {
+    localStorage.setItem(
+      "albumCover:" + path,
+      JSON.stringify({ src, ts: Date.now() })
+    );
+  } catch {
+    /* ignore quota / unavailable storage */
+  }
+}
+
 export default function Album() {
+  const pathname = window.location.pathname;
+  const path = pathname.substring(pathname.lastIndexOf("/") + 1);
+
   const [open, setOpen] = React.useState(false);
-  const [cover, setCover] = React.useState("");
+  const [cover, setCover] = React.useState(() => readCachedCover(path));
   const [coverIndex, setCoverIndex] = React.useState(0);
   const [startIndex, setStartIndex] = React.useState(0);
 
@@ -33,8 +63,6 @@ export default function Album() {
     photos_details: []
   });
   const slideshowRef = useRef<SlideshowRef>(null);
-  const pathname = window.location.pathname;
-  const path = pathname.substring(pathname.lastIndexOf("/")+1);
   const fetchData = useCallback(async () => {
     try {
       const response = await fetch(import.meta.env.VITE_BACKEND_API+'/albums/' + path);
@@ -85,9 +113,10 @@ export default function Album() {
       if (photos.length > 0) {
         setCover(photos[resolvedIndex].src);
         setCoverIndex(resolvedIndex);
+        writeCachedCover(path, photos[resolvedIndex].src);
       }
     });
-  }, [fetchData]);
+  }, [fetchData, path]);
 
   return (
     <>
