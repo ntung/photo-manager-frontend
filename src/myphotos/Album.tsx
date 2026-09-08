@@ -102,18 +102,24 @@ export default function Album() {
       });
       setSlides(photos);
 
-      // Album cover: the photo referenced by album.cover_photo, falling back to
-      // the first photo when no cover has been set on the album.
+      // Album cover: prefer the server-resolved cover_photo_url, since the
+      // cover photo isn't necessarily one of the album's own photos (e.g. an
+      // auto-generated collage cover lives as a standalone photo). Fall back
+      // to the photo referenced by album.cover_photo within this album's own
+      // list, then to the first photo, when no cover URL comes back.
       const coverId = res.cover_photo?.$oid;
       const details: { _id?: { $oid?: string } }[] = res.photos_details ?? [];
       const idx = coverId
         ? details.findIndex((p) => p?._id?.$oid === coverId)
         : -1;
       const resolvedIndex = idx >= 0 ? idx : 0;
-      if (photos.length > 0) {
-        setCover(photos[resolvedIndex].src);
-        setCoverIndex(resolvedIndex);
-        writeCachedCover(path, photos[resolvedIndex].src);
+      const coverSrc = res.cover_photo_url
+        ? import.meta.env.VITE_BACKEND_API + res.cover_photo_url
+        : photos[resolvedIndex]?.src;
+      if (coverSrc) {
+        setCover(coverSrc);
+        setCoverIndex(idx >= 0 ? idx : 0);
+        writeCachedCover(path, coverSrc);
       }
     });
   }, [fetchData, path]);
