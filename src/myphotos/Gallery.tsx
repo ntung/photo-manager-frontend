@@ -11,7 +11,9 @@ import { useCallback, useEffect } from "react";
 export default function Gallery() {
   const [index, setIndex] = React.useState(-1);
   const [slides, setSlides] = React.useState([{
-    src: "/aaaa/default.jpg"
+    src: "/aaaa/default.jpg",
+    width: 1000,
+    height: 1200
   }]);
   const [album, setAlbum] = React.useState({
     _id: {},

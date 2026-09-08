@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useCallback, useEffect, useRef } from "react";
-import type { SlideshowRef } from "yet-another-react-lightbox/plugins/slideshow";
+import type { SlideshowRef } from "yet-another-react-lightbox";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Slideshow from "yet-another-react-lightbox/plugins/slideshow";

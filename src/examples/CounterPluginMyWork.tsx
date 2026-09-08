@@ -7,7 +7,7 @@ import "yet-another-react-lightbox/plugins/counter.css";
 
 import { LightboxButton, Paragraph, Title } from "@/components";
 // import slides from "@/data/slides";
-import ladies from "@/data/ladies01";
+import ladies from "@/data/flower01";
 
 export default function CounterPluginMyWork() {
   const [open, setOpen] = React.useState(false);
