@@ -14,6 +14,13 @@ import { LightboxButton, Paragraph, Title } from "@/components";
 export default function Album() {
   const [open, setOpen] = React.useState(false);
   const [cover, setCover] = React.useState("");
+  const [coverIndex, setCoverIndex] = React.useState(0);
+  const [startIndex, setStartIndex] = React.useState(0);
+
+  const openAt = (index: number) => {
+    setStartIndex(index);
+    setOpen(true);
+  };
   const [slides, setSlides] = React.useState([{
     src: "/aaaa/default.jpg"
   }]);
@@ -66,8 +73,18 @@ export default function Album() {
           photos.push({ "src": import.meta.env.VITE_BACKEND_API+"/photo/" + p['folder'] + "/" + p['filename'] });
       });
       setSlides(photos);
+
+      // Album cover: the photo referenced by album.cover_photo, falling back to
+      // the first photo when no cover has been set on the album.
+      const coverId = res.cover_photo?.$oid;
+      const details: { _id?: { $oid?: string } }[] = res.photos_details ?? [];
+      const idx = coverId
+        ? details.findIndex((p) => p?._id?.$oid === coverId)
+        : -1;
+      const resolvedIndex = idx >= 0 ? idx : 0;
       if (photos.length > 0) {
-        setCover(photos[0].src);
+        setCover(photos[resolvedIndex].src);
+        setCoverIndex(resolvedIndex);
       }
     });
   }, [fetchData]);
@@ -80,6 +97,7 @@ export default function Album() {
       <Lightbox
         open={open}
         close={() => setOpen(false)}
+        index={startIndex}
         slides={slides}
         plugins={[Counter, Slideshow]}
         slideshow={{ ref: slideshowRef, autoplay: true, delay: 5000 }}
@@ -89,7 +107,7 @@ export default function Album() {
         <img
           src={cover}
           alt={`${album.title} cover`}
-          onClick={() => setOpen(true)}
+          onClick={() => openAt(coverIndex)}
           style={{
             display: "block",
             margin: "0 auto 16px",
@@ -100,7 +118,7 @@ export default function Album() {
         />
       )}
 
-      <LightboxButton onClick={() => setOpen(true)} />
+      <LightboxButton onClick={() => openAt(0)} />
 
     </>
   );
